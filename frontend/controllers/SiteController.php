@@ -87,15 +87,14 @@ class SiteController extends Controller
         }
 
         $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+        if ($model->load(Yii::$app->request->post()) && $model->login())
             return $this->goBack();
-        } else {
-            $model->password = '';
 
+            $model->password = '';
             return $this->render('login', [
                 'model' => $model,
             ]);
-        }
+
     }
 
     /**
@@ -126,11 +125,12 @@ class SiteController extends Controller
             }
 
             return $this->refresh();
-        } else {
-            return $this->render('contact', [
-                'model' => $model,
-            ]);
         }
+
+        return $this->render('contact', [
+            'model' => $model,
+        ]);
+
     }
 
     /**

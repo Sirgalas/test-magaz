@@ -45,8 +45,8 @@ return [
         ],
 
 
-        'frontendManager' => __DIR__.'/urlManager.php',
-        'backendUrlManager'=>__DIR__.'/../../backend/config/urlManager.php',
+        'frontendManager' => require __DIR__.'/urlManager.php',
+        'backendUrlManager'=>require __DIR__.'/../../backend/config/urlManager.php',
         'urlManager' => function(){
             return Yii::$app->get('frontendManager');
         },
