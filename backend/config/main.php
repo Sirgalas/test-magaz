@@ -45,22 +45,23 @@ return [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
-        'as access' => [
-            'class' => 'yii\filters\AccessControl',
-            'except' => ['site/login', 'site/error'],
-            'rules' => [
-                [
-                    'allow' => true,
-                    'roles' => ['@'],
-                ],
-            ],
-        ],
+
         'backendUrlManager'=> require __DIR__ .'/urlManager.php',
         'frontendManager'=>require  __DIR__.'/../../frontend/config/urlManager.php',
         'urlManager' => function(){
                 return Yii::$app->get('backendUrlManager');
         },
 
+    ],
+    'as access' => [
+        'class' => 'yii\filters\AccessControl',
+        'except' => ['site/login', 'site/error'],
+        'rules' => [
+            [
+                'allow' => true,
+                'roles' => ['@'],
+            ],
+        ],
     ],
     'params' => $params,
 ];
