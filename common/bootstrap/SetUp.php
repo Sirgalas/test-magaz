@@ -8,13 +8,19 @@
 
 namespace common\bootstrap;
 
+use frontend\services\auth\PasswordRessetFormSevice;
 use yii\base\BootstrapInterface;
 
 class SetUp implements BootstrapInterface
 {
     public function bootstrap($app)
     {
-        // TODO: Implement bootstrap() method.
+        $container = \Yii::$container;
+
+        $container->setSingleton(PasswordRessetFormSevice::class,[],[
+            $app->params['supportEmail'] => $app->name . ' robot']
+        );
+
     }
 
 }
