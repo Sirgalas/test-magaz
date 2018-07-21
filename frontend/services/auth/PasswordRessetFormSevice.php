@@ -13,11 +13,9 @@ use yii\mail\MailerInterface;
 class PasswordRessetFormSevice
 {
 
-    private $supportEmail;
     private $mailer;
 
-    public function __construct($supportEmail, MailerInterface $mailer) {
-        $this->supportEmail=$supportEmail;
+    public function __construct( MailerInterface $mailer) {
         $this->mailer=$mailer;
     }
 
@@ -41,7 +39,6 @@ class PasswordRessetFormSevice
                 ['html' => 'passwordResetToken-html', 'text' => 'passwordResetToken-text'],
                 ['user' => $user]
             )
-            ->setFrom($this->supportEmail)
             ->setTo($form->email)
             ->setSubject('Password reset for ' . Yii::$app->name)
             ->send();

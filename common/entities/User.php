@@ -20,10 +20,11 @@ use yii\web\IdentityInterface;
  * @property integer $created_at
  * @property integer $updated_at
  * @property string $password write-only password
+ * @property string email_confirm_signup
  */
 class User extends ActiveRecord implements IdentityInterface
 {
-    const STATUS_DELETED = 0;
+    const STATUS_WAIT = 0;
     const STATUS_ACTIVE = 10;
 
     public static function signup(string $username, string $email, string $password):self
@@ -33,9 +34,24 @@ class User extends ActiveRecord implements IdentityInterface
         $user->email=$email;
         $user->setPassword($password);
         $user->created_at=time();
-        $user->status=self::STATUS_ACTIVE;
+        $user->status=self::STATUS_WAIT;
+        $user->genereteEmailConfirmToken();
         $user->generateAuthKey();
         return $user;
+    }
+
+    public function confirmEmail(){
+        if(!$this->isWait())
+            throw new \DomainException('User is already active.');
+
+        $this->status=self::STATUS_ACTIVE;
+        $this->deleteEmailConfirmToken();
+
+    }
+
+
+    public function isWait(){
+        return $this->status==self::STATUS_WAIT;
     }
 
     /**
@@ -63,7 +79,7 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return [
             ['status', 'default', 'value' => self::STATUS_ACTIVE],
-            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]],
+            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_WAIT]],
         ];
     }
 
@@ -218,5 +234,13 @@ class User extends ActiveRecord implements IdentityInterface
 
     public function isActive(){
         return $this->status==self::STATUS_ACTIVE;
+    }
+
+    private function genereteEmailConfirmToken(){
+        $this->email_confirm_signup=Yii::$app->security->generateRandomString();
+    }
+
+    private function deleteEmailConfirmToken(){
+        $this->email_confirm_signup=null;
     }
 }
