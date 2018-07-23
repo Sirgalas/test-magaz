@@ -1,11 +1,11 @@
 <?php
 
-namespace frontend\services\auth;
+namespace shop\services\auth;
 
 
-use frontend\forms\PasswordResetRequestForm;
-use common\entities\User;
-use frontend\forms\ResetPasswordForm;
+use shop\forms\PasswordResetRequestForm;
+use shop\repositories\UserRepository;
+use shop\forms\ResetPasswordForm;
 use Yii;
 use yii\mail\MailerInterface;
 
@@ -14,25 +14,23 @@ class PasswordRessetFormSevice
 {
 
     private $mailer;
+    private $users;
 
-    public function __construct( MailerInterface $mailer) {
+    public function __construct( MailerInterface $mailer,UserRepository $users) {
         $this->mailer=$mailer;
+        $this->users=$users;
     }
 
     public function request(PasswordResetRequestForm $form):void
     {
-        $user = User::findOne([
-            'status' => User::STATUS_ACTIVE,
-            'email' => $form->email,
-        ]);
+       $user=$this->users->getByEmail($form->email);
 
-        if (!$user)
-            throw new \DomainException('User not find');
+       if(!$user->isActive())
+           throw new \DomainException('user not active');
 
         $user->requestPasswordReset();
 
-        if(!$user->save())
-            throw new \RuntimeException('User not save');
+        $this->users->save($user);
 
         $sent =$this->mailer
             ->compose(
@@ -53,20 +51,16 @@ class PasswordRessetFormSevice
         if(empty($token)||!is_string($token))
             throw new \DomainException('Password reset token cannot be blank.');
 
-        if(User::findByPasswordResetToken($token))
+        if(!$this->users->existsByPasswordResetToken($token))
             throw new \DomainException('Wrong password reset token.');
     }
 
     public function reset(string $token, ResetPasswordForm $form){
-        $user=User::findByPasswordResetToken($token);
-
-        if(!$user)
-            throw new \DomainException('User is not found.');
-
+        $user = $this->users->getByPasswordResetToken($token);
         $user->resetPassword($form->password);
-
-        if(!$user->save())
-            throw new \DomainException('Saving error.');
+        $this->users->save($user);
 
     }
+
+
 }

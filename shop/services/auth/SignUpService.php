@@ -1,21 +1,24 @@
 <?php
 
 
-namespace frontend\services\auth;
+namespace shop\services\auth;
 
-use common\entities\User;
-use frontend\forms\SignupForm;
+use shop\entities\User;
+use shop\forms\SignupForm;
 use yii\mail\MailerInterface;
+use shop\repositories\UserRepository;
 
 class SignUpService
 {
     private $mailer;
     private $name;
+    private $users;
 
-    public function __construct($name,MailerInterface $mailer) {
+    public function __construct($name,MailerInterface $mailer,UserRepository $userRepository) {
 
         $this->name=$name;
         $this->mailer=$mailer;
+        $this->users=$userRepository;
     }
 
     public function signup(SignupForm $signupForm):User
@@ -25,9 +28,7 @@ class SignUpService
             $signupForm->email,
             $signupForm->password
         );
-        if(!$user->save()){
-            throw new \RuntimeException('Saving error');
-        }
+        $this->users->save($user);
         $sent=$this->mailer
             ->compose(
                 ['html' => 'emailConfirmToken-html', 'text' => 'emailConfirmToken-text'],
@@ -36,9 +37,8 @@ class SignUpService
             ->setTo($signupForm->email)
             ->setSubject('Signup confirm for ' . $this->name)
             ->send();
-        if (!$sent) {
+        if (!$sent)
             throw new \RuntimeException('Email sending error.');
-        }
     }
 
     public function confirm($token):void
@@ -46,14 +46,11 @@ class SignUpService
         if(empty($token))
             throw new  \DomainException('Empty confirm token.');
 
-        $user=User::findOne(['email_confirm_signup'=>$token]);
+        $user=$this->users->getByEmailConfirm($token);
 
-        if(!$user)
-            throw new \DomainException('user not find');
         $user->confirmEmail();
 
-        if(!$user->save())
-            throw new \DomainException('Saving error');
+        $this->users->save($user);
     }
 
 }
