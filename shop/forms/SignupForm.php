@@ -2,7 +2,7 @@
 namespace shop\forms;
 
 use yii\base\Model;
-use shop\entities\User;
+use shop\entities\User\User;
 
 /**
  * Signup form

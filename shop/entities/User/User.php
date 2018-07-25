@@ -1,11 +1,14 @@
 <?php
-namespace shop\entities;
+namespace shop\entities\User;
 
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
+use lhs\Yii2SaveRelationsBehavior\SaveRelationsBehavior;
+use yii\db\ActiveQuery;
+use shop\entities\User\UserNetworks;
 
 /**
  * User model
@@ -21,38 +24,14 @@ use yii\web\IdentityInterface;
  * @property integer $updated_at
  * @property string $password write-only password
  * @property string email_confirm_signup
+ * @property UserNetworks[] $networks
  */
 class User extends ActiveRecord implements IdentityInterface
 {
     const STATUS_WAIT = 0;
     const STATUS_ACTIVE = 10;
 
-    public static function signup(string $username, string $email, string $password):self
-    {
-        $user=new static();
-        $user->username=$username;
-        $user->email=$email;
-        $user->setPassword($password);
-        $user->created_at=time();
-        $user->status=self::STATUS_WAIT;
-        $user->genereteEmailConfirmToken();
-        $user->generateAuthKey();
-        return $user;
-    }
 
-    public function confirmEmail(){
-        if(!$this->isWait())
-            throw new \DomainException('User is already active.');
-
-        $this->status=self::STATUS_ACTIVE;
-        $this->deleteEmailConfirmToken();
-
-    }
-
-
-    public function isWait(){
-        return $this->status==self::STATUS_WAIT;
-    }
 
     /**
      * {@inheritdoc}
@@ -69,6 +48,10 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return [
             TimestampBehavior::class,
+            [
+                'class' => SaveRelationsBehavior::class,
+                'relations' => ['networks'],
+            ]
         ];
     }
 
@@ -80,6 +63,13 @@ class User extends ActiveRecord implements IdentityInterface
         return [
             ['status', 'default', 'value' => self::STATUS_ACTIVE],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_WAIT]],
+        ];
+    }
+
+    public function transactions()
+    {
+        return [
+            self::SCENARIO_DEFAULT => self::OP_ALL,
         ];
     }
 
@@ -242,5 +232,46 @@ class User extends ActiveRecord implements IdentityInterface
 
     private function deleteEmailConfirmToken(){
         $this->email_confirm_signup=null;
+    }
+
+    public static function signup(string $username, string $email, string $password):self
+    {
+        $user=new static();
+        $user->username=$username;
+        $user->email=$email;
+        $user->setPassword($password);
+        $user->created_at=time();
+        $user->status=self::STATUS_WAIT;
+        $user->genereteEmailConfirmToken();
+        $user->generateAuthKey();
+        return $user;
+    }
+
+    public function confirmEmail(){
+        if(!$this->isWait())
+            throw new \DomainException('User is already active.');
+
+        $this->status=self::STATUS_ACTIVE;
+        $this->deleteEmailConfirmToken();
+
+    }
+
+    public function isWait(){
+        return $this->status==self::STATUS_WAIT;
+    }
+
+    public static function networkSignup($network, $identity):self
+    {
+        $user= new User();
+        $user->created_at=time();
+        $user->status=User::STATUS_ACTIVE;
+        $user->generateAuthKey();
+        $user->networks = [UserNetworks::create($network, $identity)];
+        return $user;
+    }
+
+    public function getNetworks():ActiveQuery
+    {
+        return $this->hasMany(UserNetworks::class,['user_id' => 'id']);
     }
 }

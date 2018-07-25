@@ -1,7 +1,7 @@
 <?php
 
 use yii\db\Migration;
-use shop\entities\User;
+use shop\entities\User\User;
 /**
  * Class m180721_154258_add_column_email_confirm_token_from_user_table
  */
