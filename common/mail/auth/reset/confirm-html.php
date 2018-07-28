@@ -2,7 +2,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $user shop\entities\User\User */
+/* @var $user \shop\entities\user\User\User */
 
 $resetLink = Yii::$app->urlManager->createAbsoluteUrl(['auth/reset/confirm', 'token' => $user->password_reset_token]);?>
 <div class="password-reset">

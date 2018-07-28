@@ -1,5 +1,5 @@
 <?php
-namespace shop\entities\User;
+namespace shop\entities\user;
 
 use Yii;
 use yii\base\NotSupportedException;
@@ -8,7 +8,7 @@ use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 use lhs\Yii2SaveRelationsBehavior\SaveRelationsBehavior;
 use yii\db\ActiveQuery;
-use shop\entities\User\UserNetworks;
+use shop\entities\user\UserNetworks;
 
 /**
  * User model
@@ -24,7 +24,7 @@ use shop\entities\User\UserNetworks;
  * @property integer $updated_at
  * @property string $password write-only password
  * @property string email_confirm_signup
- * @property UserNetworks[] $networks
+ * @property UserNetworks[] $userNetworks
  */
 class User extends ActiveRecord implements IdentityInterface
 {
@@ -50,7 +50,7 @@ class User extends ActiveRecord implements IdentityInterface
             TimestampBehavior::class,
             [
                 'class' => SaveRelationsBehavior::class,
-                'relations' => ['networks'],
+                'relations' => ['userNetworks'],
             ]
         ];
     }
@@ -234,6 +234,11 @@ class User extends ActiveRecord implements IdentityInterface
         $this->email_confirm_signup=null;
     }
 
+    public function getUserNetworks():ActiveQuery
+    {
+        return $this->hasMany(UserNetworks::class,['user_id' => 'id']);
+    }
+
     public static function signup(string $username, string $email, string $password):self
     {
         $user=new static();
@@ -266,12 +271,23 @@ class User extends ActiveRecord implements IdentityInterface
         $user->created_at=time();
         $user->status=User::STATUS_ACTIVE;
         $user->generateAuthKey();
-        $user->networks = [UserNetworks::create($network, $identity)];
+        $user->userNetworks = [UserNetworks::create($network, $identity)];
         return $user;
     }
 
-    public function getNetworks():ActiveQuery
+    public function attachNetwork($network, $identity):void
     {
-        return $this->hasMany(UserNetworks::class,['user_id' => 'id']);
+        $network=$this->userNetworks;
+        foreach ($network as $current)
+        {
+            if($current->isFor($network, $identity))
+            {
+                throw new \DomainException('Network is already attached.');
+            }
+        }
+        $networks[]=UserNetworks::create($network, $identity);
+        $this->userNetworks = $networks;
     }
+
+
 }

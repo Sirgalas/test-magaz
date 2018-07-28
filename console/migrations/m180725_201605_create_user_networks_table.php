@@ -1,7 +1,7 @@
 <?php
 
 use yii\db\Migration;
-use shop\entities\User\User;
+use shop\entities\user\User\User;
 /**
  * Handles the creation of table `user_networks`.
  */

@@ -1,7 +1,7 @@
 <?php
 namespace shop\repositories;
 use shop\repositories\NotFoundException;
-use shop\entities\User\User;
+use shop\entities\user\User;
 
 class UserRepository
 {
@@ -48,7 +48,14 @@ class UserRepository
 
     public function findByNetworkIdentity($network, $identity): ?User
     {
-        return User::find()->joinWith('networks n')->andWhere(['n.networks'=>$network,'n.identity'=>$identity])->one();
+        return User::find()->joinWith('userNetworks n')->andWhere(['n.network'=>$network,'n.identity'=>$identity])->one();
     }
+
+    public function get($id): User
+    {
+        return $this->getBy(['id'=>$id]);
+    }
+
+
 
 }

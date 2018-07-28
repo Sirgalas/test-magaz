@@ -1,7 +1,8 @@
 <?php
 
-namespace shop\entities\User;
+namespace shop\entities\user;
 
+use shop\entities\user\User;
 use Yii;
 use Webmozart\Assert\Assert;
 /**
@@ -67,6 +68,12 @@ class UserNetworks extends \yii\db\ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(User::className(), ['id' => 'user_id']);
+        return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
+    public function isFor($network, $identity):bool
+    {
+        return $this->network === $network && $this->identity === $identity;
     }
 }
+

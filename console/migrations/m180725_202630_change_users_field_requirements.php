@@ -1,7 +1,7 @@
 <?php
 
 use yii\db\Migration;
-use shop\entities\User\User;
+use shop\entities\user\User;
 /**
  * Class m180725_202630_change_users_field_requirements
  */
