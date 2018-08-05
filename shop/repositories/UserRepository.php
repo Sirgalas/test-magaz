@@ -34,7 +34,7 @@ class UserRepository
     public function save(User $user): void
     {
         if (!$user->save()) {
-            throw new \RuntimeException('Saving error.');
+            throw new \RuntimeException(var_dump($user->errors));
         }
     }
 

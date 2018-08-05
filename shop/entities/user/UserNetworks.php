@@ -25,7 +25,7 @@ class UserNetworks extends \yii\db\ActiveRecord
         $item= new static();
         $item->network=$network;
         $item->identity=$identity;
-
+        return $item;
     }
     /**
      * {@inheritdoc}
@@ -38,7 +38,7 @@ class UserNetworks extends \yii\db\ActiveRecord
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    /*public function rules()
     {
         return [
             [['user_id', 'identity', 'network'], 'required'],
@@ -52,7 +52,7 @@ class UserNetworks extends \yii\db\ActiveRecord
 
     /**
      * {@inheritdoc}
-     */
+     * /
     public function attributeLabels()
     {
         return [
