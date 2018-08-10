@@ -7,7 +7,7 @@ use yii\web\Controller;
 use shop\services\auth\AuthService;
 use Yii;
 use yii\filters\VerbFilter;
-use shop\forms\LoginForm;
+use shop\forms\auth\LoginForm;
 
 class AuthController extends Controller
 {

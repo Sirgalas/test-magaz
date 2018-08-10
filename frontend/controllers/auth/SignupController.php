@@ -7,7 +7,7 @@ use Yii;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use shop\forms\SignupForm;
+use shop\forms\auth\SignupForm;
 
 
 /**
@@ -81,7 +81,7 @@ class SignupController extends Controller
             }catch (\DomainException $e){
                 Yii::$app->session->setFlash('error',$e->getMessage());
             }
-            
+
         }
         return $this->render('signup', [
             'model' => $form,

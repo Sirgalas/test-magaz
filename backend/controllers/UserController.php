@@ -2,6 +2,8 @@
 
 namespace backend\controllers;
 
+use forms\manage\user\UserEditForm;
+use shop\services\manage\UserManageService;
 use Yii;
 use shop\entities\user\User;
 use backend\search\UserSearch;
@@ -14,6 +16,13 @@ use yii\filters\VerbFilter;
  */
 class UserController extends Controller
 {
+    private $manageService;
+    public function __construct(string $id,  $module, UserManageService $manageService, array $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->manageService=$manageService;
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -64,14 +73,20 @@ class UserController extends Controller
      */
     public function actionCreate()
     {
-        $model = new User();
+        $form = new User();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try{
+                $user=$this->manageService->create($form);
+                return $this->redirect(['view', 'id' => $user->id]);
+            }catch (\DomainException $e){
+                Yii::$app->errorHandler->logException($e);
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
         }
 
         return $this->render('create', [
-            'model' => $model,
+            'model' => $form,
         ]);
     }
 
@@ -84,14 +99,23 @@ class UserController extends Controller
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $user = $this->findModel($id);
+        $form= new UserEditForm($user);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            try{
+                $this->manageService->edit($user->id,$form);
+                return $this->redirect(['view', 'id' => $user->id]);
+            }catch (\DomainException $e){
+               Yii::$app->errorHandler->logException($e);
+               Yii::$app->session->setFlash('error',$e->getMessage());
+            }
+
         }
 
         return $this->render('update', [
-            'model' => $model,
+            'model' => $form,
+            'user'=>$user
         ]);
     }
 
@@ -104,8 +128,7 @@ class UserController extends Controller
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
-
+        $this->manageService->remove($id);
         return $this->redirect(['index']);
     }
 

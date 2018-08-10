@@ -3,7 +3,7 @@
 namespace frontend\controllers\auth;
 
 use Yii;
-use shop\forms\LoginForm;
+use shop\forms\auth\LoginForm;
 use shop\services\auth\AuthService;
 use yii\web\Controller;
 

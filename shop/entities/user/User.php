@@ -1,14 +1,13 @@
 <?php
-namespace shop\entities\user;
+namespace shop\entities\User;
 
+use lhs\Yii2SaveRelationsBehavior\SaveRelationsBehavior;
 use Yii;
 use yii\base\NotSupportedException;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
-use lhs\Yii2SaveRelationsBehavior\SaveRelationsBehavior;
-use yii\db\ActiveQuery;
-use shop\entities\user\UserNetworks;
 
 /**
  * User model
@@ -18,61 +17,82 @@ use shop\entities\user\UserNetworks;
  * @property string $password_hash
  * @property string $password_reset_token
  * @property string $email
+ * @property string $email_confirm_token
  * @property string $auth_key
  * @property integer $status
  * @property integer $created_at
  * @property integer $updated_at
  * @property string $password write-only password
- * @property string email_confirm_signup
- * @property UserNetworks[] $userNetworks
+ *
+ * @property Network[] $networks
  */
 class User extends ActiveRecord implements IdentityInterface
 {
     const STATUS_WAIT = 0;
     const STATUS_ACTIVE = 10;
 
-
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function tableName()
+    public function edit(string $username,string $email):void
     {
-        return '{{%user}}';
+       $this->username=$username;
+       $this->email=$email;
+       $this->updated_at=time();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function behaviors()
+    public static function create(string $username, string $email, string $password): self
     {
-        return [
-            TimestampBehavior::class,
-            [
-                'class' => SaveRelationsBehavior::class,
-                'relations' => ['userNetworks'],
-            ]
-        ];
+        $user = new User();
+        $user->username = $username;
+        $user->email = $email;
+        $user->setPassword(!empty($password) ? $password : Yii::$app->security->generateRandomString());
+        $user->created_at = time();
+        $user->status = self::STATUS_ACTIVE;
+        $user->auth_key = Yii::$app->security->generateRandomString();
+        return $user;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
+    public static function requestSignup(string $username, string $email, string $password): self
     {
-        return [
-            ['status', 'default', 'value' => self::STATUS_ACTIVE],
-            ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_WAIT]],
-        ];
+        $user = new User();
+        $user->username = $username;
+        $user->email = $email;
+        $user->setPassword($password);
+        $user->created_at = time();
+        $user->status = self::STATUS_WAIT;
+        $user->email_confirm_token = Yii::$app->security->generateRandomString();
+        $user->generateAuthKey();
+        return $user;
     }
 
-    public function transactions()
+    public function confirmSignup(): void
     {
-        return [
-            self::SCENARIO_DEFAULT => self::OP_ALL,
-        ];
+        if (!$this->isWait()) {
+            throw new \DomainException('User is already active.');
+        }
+        $this->status = self::STATUS_ACTIVE;
+        $this->email_confirm_token = null;
     }
 
+    public static function signupByNetwork($network, $identity): self
+    {
+        $user = new User();
+        $user->created_at = time();
+        $user->status = self::STATUS_ACTIVE;
+        $user->generateAuthKey();
+        $user->networks = [Network::create($network, $identity)];
+        return $user;
+    }
+
+    public function attachNetwork($network, $identity): void
+    {
+        $networks = $this->networks;
+        foreach ($networks as $current) {
+            if ($current->isFor($network, $identity)) {
+                throw new \DomainException('Network is already attached.');
+            }
+        }
+        $networks[] = Network::create($network, $identity);
+        $this->networks = $networks;
+    }
 
     public function requestPasswordReset(): void
     {
@@ -91,8 +111,52 @@ class User extends ActiveRecord implements IdentityInterface
         $this->password_reset_token = null;
     }
 
+    public function isWait(): bool
+    {
+        return $this->status === self::STATUS_WAIT;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    public function getNetworks(): ActiveQuery
+    {
+        return $this->hasMany(Network::className(), ['user_id' => 'id']);
+    }
+
     /**
-     * {@inheritdoc}
+     * @inheritdoc
+     */
+    public static function tableName()
+    {
+        return '{{%user}}';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function behaviors()
+    {
+        return [
+            TimestampBehavior::className(),
+            [
+                'class' => SaveRelationsBehavior::className(),
+                'relations' => ['networks'],
+            ],
+        ];
+    }
+
+    public function transactions()
+    {
+        return [
+            self::SCENARIO_DEFAULT => self::OP_ALL,
+        ];
+    }
+
+    /**
+     * @inheritdoc
      */
     public static function findIdentity($id)
     {
@@ -100,7 +164,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
@@ -154,7 +218,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function getId()
     {
@@ -162,7 +226,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function getAuthKey()
     {
@@ -170,7 +234,7 @@ class User extends ActiveRecord implements IdentityInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function validateAuthKey($authKey)
     {
@@ -205,89 +269,4 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $this->auth_key = Yii::$app->security->generateRandomString();
     }
-
-    /**
-     * Generates new password reset token
-     */
-    public function generatePasswordResetToken()
-    {
-        $this->password_reset_token = Yii::$app->security->generateRandomString() . '_' . time();
-    }
-
-    /**
-     * Removes password reset token
-     */
-    public function removePasswordResetToken()
-    {
-        $this->password_reset_token = null;
-    }
-
-    public function isActive(){
-        return $this->status==self::STATUS_ACTIVE;
-    }
-
-    private function genereteEmailConfirmToken(){
-        $this->email_confirm_signup=Yii::$app->security->generateRandomString();
-    }
-
-    private function deleteEmailConfirmToken(){
-        $this->email_confirm_signup=null;
-    }
-
-    public function getUserNetworks():ActiveQuery
-    {
-        return $this->hasMany(UserNetworks::class,['user_id' => 'id']);
-    }
-
-    public static function signup(string $username, string $email, string $password):self
-    {
-        $user=new static();
-        $user->username=$username;
-        $user->email=$email;
-        $user->setPassword($password);
-        $user->created_at=time();
-        $user->status=self::STATUS_WAIT;
-        $user->genereteEmailConfirmToken();
-        $user->generateAuthKey();
-        return $user;
-    }
-
-    public function confirmEmail(){
-        if(!$this->isWait())
-            throw new \DomainException('User is already active.');
-
-        $this->status=self::STATUS_ACTIVE;
-        $this->deleteEmailConfirmToken();
-
-    }
-
-    public function isWait(){
-        return $this->status==self::STATUS_WAIT;
-    }
-
-    public static function networkSignup($network, $identity):self
-    {
-        $user= new User();
-        $user->created_at=time();
-        $user->status=User::STATUS_ACTIVE;
-        $user->generateAuthKey();
-        $user->userNetworks = [UserNetworks::create($network, $identity)];
-        return $user;
-    }
-
-    public function attachNetwork($network, $identity):void
-    {
-        $network=$this->userNetworks;
-        foreach ($network as $current)
-        {
-            if($current->isFor($network, $identity))
-            {
-                throw new \DomainException('Network is already attached.');
-            }
-        }
-        $networks[]=UserNetworks::create($network, $identity);
-        $this->userNetworks = $networks;
-    }
-
-
 }

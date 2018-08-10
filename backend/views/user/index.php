@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\grid\GridView;
 use shop\helpers\UserHelper;
 use shop\entities\user\User;
-
+use kartik\widgets\DatePicker;
 /* @var $this yii\web\View */
 /* @var $searchModel backend\search\UserSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -14,10 +14,7 @@ $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="user-index">
 
-    <h1><?= Html::encode($this->title) ?></h1>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
-
-    <p>
+   <p>
         <?= Html::a('Create User', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
     <div class="box">
@@ -29,6 +26,22 @@ $this->params['breadcrumbs'][] = $this->title;
                     ['class' => 'yii\grid\SerialColumn'],
 
                     'id',
+                    [
+                        'attribute'=>'created_at',
+                        'filter'=>  DatePicker::widget([
+                            'model' => $searchModel,
+                            'attribute'=> 'date_from',
+                            'attribute2' => 'date_to',
+                            'type' => DatePicker::TYPE_RANGE,
+                            'separator'=>'-',
+                            'pluginOptions'   =>[
+                               'todayHighlight' =>true,
+                               'autoclose'=>true,
+                               'format' => 'yyyy-mm-dd',
+                            ],
+                        ]),
+                        'format'=>'datetime'
+                    ],
                     'created_at:datetime',
                     [
                      'attribute'=>'username',
@@ -41,6 +54,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'email:email',
                     [
                         'attribute'=>'status',
+                        'filter'=> UserHelper::statusList(),
                         'value'=>function(User $model){
                             return UserHelper::statusLabel($model->status);
                         },

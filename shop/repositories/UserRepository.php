@@ -1,5 +1,6 @@
 <?php
 namespace shop\repositories;
+use http\Exception\RuntimeException;
 use shop\repositories\NotFoundException;
 use shop\entities\user\User;
 
@@ -54,6 +55,12 @@ class UserRepository
     public function get($id): User
     {
         return $this->getBy(['id'=>$id]);
+    }
+
+    public function remove(User $user)
+    {
+            if(!$user->delete())
+                throw new \RuntimeException('Removing error.');
     }
 
 

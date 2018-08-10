@@ -3,9 +3,9 @@
 namespace shop\services\auth;
 
 
-use shop\forms\PasswordResetRequestForm;
+use shop\forms\auth\PasswordResetRequestForm;
 use shop\repositories\UserRepository;
-use shop\forms\ResetPasswordForm;
+use shop\forms\auth\ResetPasswordForm;
 use Yii;
 use yii\mail\MailerInterface;
 
