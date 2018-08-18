@@ -1,5 +1,5 @@
 <?php
-namespace shop\entities\User;
+namespace shop\entities\user;
 
 use lhs\Yii2SaveRelationsBehavior\SaveRelationsBehavior;
 use Yii;
