@@ -1,6 +1,6 @@
 <?php
 
-namespace frontend\forms\manage\shop;
+namespace shop\forms\manage\shop;
 
 use yii\base\Model;
 use shop\entities\shop\Tags;
@@ -31,7 +31,7 @@ class TagForm extends Model
     public function rules(): array
     {
         return [
-            [['name', 'slug'], 'required'],
+            [['name'], 'required'],
             [['name', 'slug'], 'string', 'max' => 255],
             ['slug', 'match', 'pattern' => '#^[a-z0-9_-]*$#s'],
             [['name', 'slug'], 'unique', 'targetClass' => Tags::class, 'filter' => $this->_tag ? ['<>', 'id', $this->_tag->id] : null]
