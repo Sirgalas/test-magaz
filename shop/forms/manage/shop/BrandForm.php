@@ -3,13 +3,13 @@ namespace shop\forms\manage\shop;
 
 use shop\entities\Shop\Brand;
 use shop\forms\manage\MetaForm;
-use yii\base\Model;
+use validator\SlugValidator;
 use yii\helpers\ArrayHelper;
-
+use shop\forms\CompositeForm;
 /**
  * @property MetaForm $meta;
  */
-class BrandForm extends Model
+class BrandForm extends CompositeForm
 {
     public $name;
     public $slug;
@@ -29,26 +29,13 @@ class BrandForm extends Model
         parent::__construct($config);
     }
 
-    public function load($data, $formName = null): bool
-    {
-        $self = parent::load($data, $formName);
-        $meta = $this->_meta->load($data, $formName ? null : 'meta');
-        return $self && $meta;
-    }
-
-    public function validate($attributeNames = null, $clearErrors = true): bool
-    {
-        $self = parent::validate(array_filter($attributeNames,'is_string'), $clearErrors);
-        $meta = $this->_meta->validate(ArrayHelper::getValue($attributeNames,'meta)', $clearErrors));
-        return $self && $meta;
-    }
 
     public function rules(): array
     {
         return [
             [['name', 'slug'], 'required'],
             [['name', 'slug'], 'string', 'max' => 255],
-            ['slug', 'match', 'pattern' => '#^[a-z0-9_-]*$#s'],
+            ['slug', SlugValidator::class ],
             [
                 ['name', 'slug'],
                 'unique',
@@ -58,8 +45,8 @@ class BrandForm extends Model
         ];
     }
 
-    public function getMeta(): MetaForm
+    public function internalForms(): array
     {
-        return $this->_meta;
+        return ['meta'];
     }
 }
