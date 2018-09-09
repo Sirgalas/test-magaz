@@ -8,8 +8,13 @@ use yii\db\ActiveRecord;
 * @property integer $id
 * @property string $name
 * @property string $category_id
-*/
-
+ * @property int $price_new
+ * @property int $price_old
+ * @property $tagAssignments
+ * @property $brand_id
+ * @property $code
+ * @property $meta
+ */
 
 class Product extends ActiveRecord
 {
@@ -33,5 +38,6 @@ class Product extends ActiveRecord
     {
         return '';
     }
+    public function getValue($id){}
 
 }
