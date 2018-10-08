@@ -1,7 +1,7 @@
 <?php
 
 
-namespace shop\services\manage;
+namespace shop\services\manage\shop;
 
 use forms\manage\shop\CategoryForm;
 use shop\entities\Meta;

@@ -41,7 +41,7 @@ class Brand extends ActiveRecord
 
     public static function tableName(): string
     {
-        return '{{%shop_brands}}';
+        return '{{%shop_brand}}';
     }
 
     public function behaviors(): array

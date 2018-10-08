@@ -17,6 +17,9 @@ use shop\forms\manage\shop\TagForm;
  * @property PhotosForm $photos
  * @property TagForm $tags
  * @property ValueForm[] $values
+ * @property  string $code;
+ * @property string $name
+ * @property integer $bradId
  */
 
 class ProductCreateForm extends CompositeForm

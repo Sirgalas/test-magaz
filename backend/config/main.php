@@ -26,7 +26,6 @@ return [
                 'domain'=>$params['cookieDomain']],
         ],
         'session' => [
-            // this is the name of the session cookie used for login on the backend
             'name' => '_session',
             'cookieParams' => [
                 'domain'=>$params['cookieDomain'],

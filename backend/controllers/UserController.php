@@ -3,7 +3,7 @@
 namespace backend\controllers;
 
 use forms\manage\user\UserEditForm;
-use shop\services\manage\UserManageService;
+use shop\services\manage\shop\UserManageService;
 use Yii;
 use shop\entities\user\User;
 use backend\search\UserSearch;

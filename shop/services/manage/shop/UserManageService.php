@@ -1,7 +1,7 @@
 <?php
 
 
-namespace shop\services\manage;
+namespace shop\services\manage\shop;
 
 
 use shop\entities\user\User;

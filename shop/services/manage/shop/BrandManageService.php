@@ -6,7 +6,7 @@
  * Time: 23:00
  */
 
-namespace shop\services\manage;
+namespace shop\services\manage\shop;
 
 use shop\entities\Meta;
 use shop\entities\shop\Brand;
