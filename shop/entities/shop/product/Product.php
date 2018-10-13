@@ -10,6 +10,8 @@ use shop\entities\behaviors\MetaBehavior;
 use shop\entities\Meta;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use lhs\Yii2SaveRelationsBehavior\SaveRelationsBehavior;
+use entities\shop\product\CategoryAssignment;
 /**
  * This is the model class for table "shop_products".
  *
@@ -25,6 +27,7 @@ use yii\db\ActiveRecord;
  * @property string $meta
  * @property Brand $brand
  * @property Categories $category
+ * @property CategoryAssignment[] $categoryAssignments
  */
 class Product extends \yii\db\ActiveRecord
 {
@@ -57,7 +60,46 @@ class Product extends \yii\db\ActiveRecord
         return $this->hasOne(Categories::class,['id'=>'category_id']);
     }
 
+    public function getCategoryAssignments(): ActiveQuery
+    {
+        return $this->hasMany(CategoryAssignment::class, ['product_id' => 'id']);
+    }
 
+
+    public function changeMainCategory($categoryId): void
+    {
+        $this->category_id = $categoryId;
+    }
+
+    public function assignCategory($id): void
+    {
+        $assignments = $this->categoryAssignments;
+        foreach ($assignments as $assignment){
+            if ($assignment->isForCategory($id)) {
+                return;
+            }
+        }
+        $assignments[]=CategoryAssignment::create($id);
+        $this->categoryAssignments=$assignments;
+
+    }
+
+    public function revokeCategory($id)
+    {
+        $assignments = $this->categoryAssignments;
+        foreach ($assignments as $assignment) {
+            if ($assignment->isForCategory($id)) {
+                unset($assignments[$id]);
+                $this->categoryAssignments=$assignments;
+                return;
+            }
+        }
+        throw new \DomainException('Assignment is not found.');
+    }
+
+    public function revokeCategories(){
+        $this->categoryAssignments=[];
+    }
 
     /**
      * {@inheritdoc}

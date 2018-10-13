@@ -1935,16 +1935,16 @@
         },
         {
             "name": "la-haute-societe/yii2-save-relations-behavior",
-            "version": "1.5.0",
+            "version": "1.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/la-haute-societe/yii2-save-relations-behavior.git",
-                "reference": "b2dab0d252906e50798bb6b5b94077a466d61f39"
+                "reference": "1784027e913177bf508c9a7e02357837869ec16b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/la-haute-societe/yii2-save-relations-behavior/zipball/b2dab0d252906e50798bb6b5b94077a466d61f39",
-                "reference": "b2dab0d252906e50798bb6b5b94077a466d61f39",
+                "url": "https://api.github.com/repos/la-haute-societe/yii2-save-relations-behavior/zipball/1784027e913177bf508c9a7e02357837869ec16b",
+                "reference": "1784027e913177bf508c9a7e02357837869ec16b",
                 "shasum": ""
             },
             "require": {
@@ -1981,7 +1981,7 @@
                 "relations",
                 "yii2"
             ],
-            "time": "2018-08-06T12:25:18+00:00"
+            "time": "2018-09-11T09:20:07+00:00"
         },
         {
             "name": "paulzi/yii2-nested-sets",

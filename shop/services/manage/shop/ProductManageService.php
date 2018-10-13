@@ -47,6 +47,10 @@ class ProductManageService
 
         $product->setPrice($form->price->new, $form->price->old);
 
+        foreach($form->categories->outher as $outherId){
+              $category=$form->categories->outher($outherId);
+              $product->assignCategory($category->id);
+        }
 
         return  $this->products->save($product);;
     }
