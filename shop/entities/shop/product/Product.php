@@ -2,6 +2,7 @@
 
 namespace shop\entities\shop\product;
 
+use entities\shop\product\Photo;
 use forms\manage\shop\product\ProductCreateForm;
 use Yii;
 use shop\entities\shop\Brand;
@@ -12,6 +13,8 @@ use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use lhs\Yii2SaveRelationsBehavior\SaveRelationsBehavior;
 use entities\shop\product\CategoryAssignment;
+use yii\web\UploadedFile;
+
 /**
  * This is the model class for table "shop_products".
  *
@@ -28,6 +31,8 @@ use entities\shop\product\CategoryAssignment;
  * @property Brand $brand
  * @property Categories $category
  * @property CategoryAssignment[] $categoryAssignments
+ * @property Value[] $values
+ * @property Photo[] $photos
  */
 class Product extends \yii\db\ActiveRecord
 {
@@ -65,41 +70,11 @@ class Product extends \yii\db\ActiveRecord
         return $this->hasMany(CategoryAssignment::class, ['product_id' => 'id']);
     }
 
-
-    public function changeMainCategory($categoryId): void
+    public function getValues(): ActiveQuery
     {
-        $this->category_id = $categoryId;
+        return $this->hasMany(Value::class, ['product_id' => 'id']);
     }
 
-    public function assignCategory($id): void
-    {
-        $assignments = $this->categoryAssignments;
-        foreach ($assignments as $assignment){
-            if ($assignment->isForCategory($id)) {
-                return;
-            }
-        }
-        $assignments[]=CategoryAssignment::create($id);
-        $this->categoryAssignments=$assignments;
-
-    }
-
-    public function revokeCategory($id)
-    {
-        $assignments = $this->categoryAssignments;
-        foreach ($assignments as $assignment) {
-            if ($assignment->isForCategory($id)) {
-                unset($assignments[$id]);
-                $this->categoryAssignments=$assignments;
-                return;
-            }
-        }
-        throw new \DomainException('Assignment is not found.');
-    }
-
-    public function revokeCategories(){
-        $this->categoryAssignments=[];
-    }
 
     /**
      * {@inheritdoc}
@@ -141,6 +116,162 @@ class Product extends \yii\db\ActiveRecord
             'price_new' => 'Price New',
             'rating' => 'Rating',
         ];
+    }
+
+    public function behaviors(): array
+    {
+        return [
+            MetaBehavior::class,
+            [
+                'class' => SaveRelationsBehavior::class,
+                'relations' => ['categoryAssignments','values','photos'],
+            ],
+        ];
+    }
+
+    public function transactions()
+    {
+        return [
+            self::SCENARIO_DEFAULT=>self::OP_ALL,
+        ];
+    }
+
+    /**
+     * @param $categoryId
+     * categories
+     */
+    public function changeMainCategory($categoryId): void
+    {
+        $this->category_id = $categoryId;
+    }
+
+    public function assignCategory($id): void
+    {
+        $assignments = $this->categoryAssignments;
+        foreach ($assignments as $assignment){
+            if ($assignment->isForCategory($id)) {
+                return;
+            }
+        }
+        $assignments[]=CategoryAssignment::create($id);
+        $this->categoryAssignments=$assignments;
+
+    }
+
+    public function revokeCategory($id)
+    {
+        $assignments = $this->categoryAssignments;
+        foreach ($assignments as $assignment) {
+            if ($assignment->isForCategory($id)) {
+                unset($assignments[$id]);
+                $this->categoryAssignments=$assignments;
+                return;
+            }
+        }
+        throw new \DomainException('Assignment is not found.');
+    }
+
+    public function revokeCategories(){
+        $this->categoryAssignments=[];
+    }
+
+    /**
+     * @param $id
+     * @param $value
+     * Characteristic
+     */
+    public function setValue($id, $value): void
+    {
+        $values = $this->values;
+        foreach ($values as $val) {
+            if ($val->isForCharacteristic($id)) {
+                $val->change($value);
+                $this->values = $values;
+                return;
+            }
+        }
+        $values[] = Value::create($id, $value);
+        $this->values = $values;
+    }
+
+    public function getValue($id): Value
+    {
+        $values = $this->values;
+        foreach ($values as $val) {
+            if ($val->isForCharacteristic($id)) {
+                return $val;
+            }
+        }
+        return Value::blank($id);
+    }
+
+    /**
+     * @param UploadedFile $file
+     * photos
+     */
+    public function addPhoto(UploadedFile $file):void
+    {
+        $photo=$this->photos;
+        $photo[]=Photo::create($file);
+        $this->updatePhotos($photo);
+    }
+
+    public function removePhoto($id):void
+    {
+        $photos=$this->photos;
+        foreach ($photos as $i =>$photo){
+            if($photo->isIdEqualTo($id)){
+                unset($photos[$i]);
+                $this->updatePhotos($photos);
+                return;
+            }
+        }
+        throw new \DomainException('Photo is not found.');
+    }
+
+    public function removePhotos(): void
+    {
+        $this->updatePhotos([]);
+    }
+
+    public function movePhotoUp($id):void
+    {
+        $photos=$this->photos;
+        foreach ($photos as $i=>$photo){
+            if($photo->isIdEqualTo($id)){
+                if($prev = $photos[$i - 1] ?? null){
+                    $photos[$i - 1] = $photo;
+                    $photos[$i] = $prev;
+                    $this->updatePhotos($photos);
+                }
+                return;
+            }
+        }
+        throw new \DomainException('Photo is not found.');
+    }
+
+    public function movePhotoDown($id):void
+    {
+        $photos=$this->photos;
+        foreach ($photos as $i=>$photo){
+            if($photo->isIdEqualTo($id)){
+                if($prev = $photos[$i + 1] ?? null){
+                    $photos[$i + 1] = $photo;
+                    $photos[$i] = $prev;
+                    $this->updatePhotos($photos);
+                }
+                return;
+            }
+        }
+        throw new \DomainException('Photo is not found.');
+    }
+
+    private function updatePhotos(array $photos): void
+    {
+        foreach ($photos as $i => $photo) {
+            $photo->setSort($i);
+        }
+        $this->photos = $photos;
     }
 
 }

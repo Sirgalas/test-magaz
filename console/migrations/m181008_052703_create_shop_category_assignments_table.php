@@ -49,7 +49,7 @@ class m181008_052703_create_shop_category_assignments_table extends Migration
         );
 
         $this->addForeignKey(
-             '{{%fk-shop_category_assignments-product_id}}',
+             '{{%fk-shop_category_assignments-category_id}}',
             '{{%shop_category_assignments}}',
             'category_id',
              Categories::tableName(),

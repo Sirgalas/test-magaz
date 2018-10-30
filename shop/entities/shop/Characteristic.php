@@ -64,10 +64,26 @@ class Characteristic extends ActiveRecord
      {
          $this->variants= Json::decode($this->getAttribute('variants_json'));
      }
+
      public function beforeSave($insert)
      {
          $this->setAttribute('variants_json',Json::encode($this->variants));
          return parent::beforeSave($insert);
+     }
+
+     public function isString():bool
+     {
+         return $this->type==self::TYPE_STRING;
+     }
+
+     public function isInteger():bool
+     {
+         return $this->type==self::TYPE_INTEGER;
+     }
+
+     public function isFloat():bool
+     {
+         return $this->type==self::TYPE_FLOAT;
      }
 
 }

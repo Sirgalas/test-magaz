@@ -6,6 +6,11 @@ namespace shop\forms\manage\shop\product;
 use yii\base\Model;
 use yii\web\UploadedFile;
 
+/**
+ * Class PhotosForm
+ * @package shop\forms\manage\shop\product
+ * @property array $files
+ */
 class PhotosForm extends Model
 {
     /**
