@@ -2,7 +2,7 @@
 
 namespace shop\forms\manage\shop;
 
-use validator\SlugValidator;
+use shop\validator\SlugValidator;
 use yii\base\Model;
 use shop\entities\shop\Tags;
 /**

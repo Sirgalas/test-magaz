@@ -3,6 +3,7 @@
 namespace shop\entities\shop\product;
 
 use entities\shop\product\Photo;
+use entities\shop\product\TagAssignment;
 use forms\manage\shop\product\ProductCreateForm;
 use Yii;
 use shop\entities\shop\Brand;
@@ -33,6 +34,7 @@ use yii\web\UploadedFile;
  * @property CategoryAssignment[] $categoryAssignments
  * @property Value[] $values
  * @property Photo[] $photos
+ * @property TagAssignment[] $tagAssignments
  */
 class Product extends \yii\db\ActiveRecord
 {
@@ -47,6 +49,14 @@ class Product extends \yii\db\ActiveRecord
         $product->meta=$meta;
         $product->created_at = time();
         return $product;
+    }
+
+    public function edit($brandId, $code, $name, Meta $meta):void
+    {
+        $this->brand_id=$brandId;
+        $this->code=$code;
+        $this->name=$name;
+        $this->meta=$meta;
     }
 
     public function setPrice($new, $old):void
@@ -75,6 +85,15 @@ class Product extends \yii\db\ActiveRecord
         return $this->hasMany(Value::class, ['product_id' => 'id']);
     }
 
+    public function getPhoto():ActiveQuery
+    {
+        return $this->hasOne(Photo::class,['product_id'=>'id'])->orderBy('sort');
+    }
+
+    public function getTagAssignments():ActiveQuery
+    {
+        return $this->hasMany(TagAssignment::class,['product_id' => 'id']);
+    }
 
     /**
      * {@inheritdoc}
@@ -124,7 +143,7 @@ class Product extends \yii\db\ActiveRecord
             MetaBehavior::class,
             [
                 'class' => SaveRelationsBehavior::class,
-                'relations' => ['categoryAssignments','values','photos'],
+                'relations' => ['categoryAssignments','tagAssignments', 'values','photos'],
             ],
         ];
     }
@@ -272,6 +291,34 @@ class Product extends \yii\db\ActiveRecord
             $photo->setSort($i);
         }
         $this->photos = $photos;
+    }
+
+    public function assignTag($id):void
+    {
+        $assignments = $this->tagAssignments;
+        foreach ($assignments as $assignment){
+           if($assignment->isForTag($id)){
+               return;
+           }
+        }
+        $assignments[]=TagAssignment::create($id);
+        $this->tagAssignments=$assignments;
+    }
+
+    public function revokeTag($id):void
+    {
+        $assignments = $this->tagAssignments;
+        foreach ($assignments as $i=>$assignment){
+            unset($assignments[$i]);
+            $this->tagAssignments=$assignments;
+            return;
+        }
+        throw new \DomainException('Assignment is not found.');
+    }
+
+    public function revokeTags():void
+    {
+        $this->tagAssignments = [];
     }
 
 }

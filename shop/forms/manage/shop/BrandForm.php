@@ -3,7 +3,7 @@ namespace shop\forms\manage\shop;
 
 use shop\entities\Shop\Brand;
 use shop\forms\manage\MetaForm;
-use validator\SlugValidator;
+use shop\validator\SlugValidator;
 use yii\helpers\ArrayHelper;
 use shop\forms\CompositeForm;
 /**

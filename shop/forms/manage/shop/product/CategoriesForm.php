@@ -29,4 +29,9 @@ class CategoriesForm extends Model
             ['others', 'default', 'value' => []]
         ];
     }
+
+    public function internalForms(): array
+    {
+        return ['meta'];
+    }
 }

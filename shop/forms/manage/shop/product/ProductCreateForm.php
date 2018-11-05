@@ -8,14 +8,14 @@ use shop\entities\shop\product\Product;
 use shop\forms\CompositeForm;
 use shop\forms\manage\MetaForm;
 use shop\forms\manage\shop\product\PhotosForm;
-use shop\forms\manage\shop\TagForm;
+
 
 /**
  * @property PriceForm $price
  * @property MetaForm $meta
  * @property CategoriesForm $categories
  * @property PhotosForm $photos
- * @property TagForm $tags
+ * @property TagsForm $tags
  * @property ValueForm[] $values
  * @property  string $code;
  * @property string $name
