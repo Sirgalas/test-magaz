@@ -9,6 +9,8 @@
 namespace services\manage\shop;
 
 use forms\manage\shop\product\CategoriesForm;
+use forms\manage\shop\product\ModificationForm;
+use forms\manage\shop\product\TagsForm;
 use shop\entities\Meta;
 use forms\manage\shop\product\ProductCreateForm;
 use repositories\shop\ProductRepository;
@@ -19,6 +21,7 @@ use shop\repositories\BrandRepository;
 use shop\repositories\shop\CategoryRepository;
 use shop\repositories\Shop\TagRepository;
 use shop\services\TransactionManager;
+use shop\forms\manage\shop\product\ProductEditForm;
 class ProductManageService
 {
     private $products;
@@ -75,7 +78,7 @@ class ProductManageService
             $product->assignTag($tag->id);
         }
 
-        $this->transaction->warp(function () use ($product, $form){
+        $this->transaction->wrap(function () use ($product, $form){
             foreach ($form->tags->newNames as $tagName) {
                 if (!$tag = $this->tags->findByName($tagName)) {
                     $tag = Tags::create($tagName, $tagName);
@@ -85,6 +88,45 @@ class ProductManageService
             }
         });
         return  $this->products->save($product);
+    }
+
+    public function edit($id, ProductEditForm $form):void
+    {
+        $product=$this->products->get($id);
+        $brand = $this->brands->get($form->brandId);
+
+        $product->edit(
+            $brand->id,
+            $form->code,
+            $form->name,
+            new Meta(
+                $form->meta->title,
+                $form->meta->description,
+                $form->meta->keywords
+            )
+        );
+
+        foreach ($form->values as $value){
+            $product->setValue($value->id,$value->value);
+        }
+
+        $product->revokeTags();
+
+        foreach ($form->tags->existing as $tagId){
+            $tag=$this->tags->get($tagId);
+            $product->assignTag($tag->id);
+        }
+
+        $this->transaction->wrap(function () use ($product, $form) {
+            foreach ($form->tags->newNames as $tagName) {
+                if (!$tag = $this->tags->findByName($tagName)) {
+                    $tag = Tags::create($tagName, $tagName);
+                    $this->tags->save($tag);
+                }
+                $product->assignTag($tag->id);
+            }
+            $this->products->save($product);
+        });
     }
 
 
@@ -132,6 +174,36 @@ class ProductManageService
     public function remove(int $id):void
     {
         $this->products->remove($id);
+    }
+
+    public function addModification($id, ModificationForm $form):void
+    {
+        $product=$this->products->get($id);
+        $product->addModification(
+            $form->code,
+            $form->name,
+            $form->price
+        );
+        $this->products->save($id);
+    }
+
+    public function editModification($id, $modificationId, ModificationForm $form):void
+    {
+        $product=$this->products->get($id);
+        $product->editModification(
+            $modificationId,
+            $form->code,
+            $form->name,
+            $form->price
+        );
+        $this->products->save($product);
+    }
+
+    public function removeModification($id, $modificationId):void
+    {
+        $product=$this->products->get($id);
+        $product->removeModification($modificationId);
+        $this->products->save($product);
     }
 
 }

@@ -3,6 +3,7 @@
 namespace shop\entities\shop\product;
 
 use entities\shop\product\Photo;
+use entities\shop\product\RelatedAssignment;
 use entities\shop\product\TagAssignment;
 use forms\manage\shop\product\ProductCreateForm;
 use Yii;
@@ -35,8 +36,10 @@ use yii\web\UploadedFile;
  * @property Value[] $values
  * @property Photo[] $photos
  * @property TagAssignment[] $tagAssignments
+ * @property RelatedAssignment[] $relatedAssignments
+ * @property Modification[] $modifications
  */
-class Product extends \yii\db\ActiveRecord
+class Product extends ActiveRecord
 {
     public $meta;
 
@@ -95,6 +98,16 @@ class Product extends \yii\db\ActiveRecord
         return $this->hasMany(TagAssignment::class,['product_id' => 'id']);
     }
 
+    public function getRelatedAssignments(): ActiveQuery
+    {
+        return $this->hasMany(RelatedAssignment::class, ['product_id' => 'id']);
+    }
+
+    public function getModifications(): ActiveQuery
+    {
+        return $this->hasMany(Modification::class, ['product_id' => 'id']);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -143,7 +156,14 @@ class Product extends \yii\db\ActiveRecord
             MetaBehavior::class,
             [
                 'class' => SaveRelationsBehavior::class,
-                'relations' => ['categoryAssignments','tagAssignments', 'values','photos'],
+                'relations' => [
+                    'categoryAssignments',
+                    'tagAssignments',
+                    'relatedAssignments',
+                    'values',
+                    'modifications',
+                    'photos'
+                ],
             ],
         ];
     }
@@ -293,6 +313,10 @@ class Product extends \yii\db\ActiveRecord
         $this->photos = $photos;
     }
 
+    /**
+     * @param $id
+     * tags
+     */
     public function assignTag($id):void
     {
         $assignments = $this->tagAssignments;
@@ -319,6 +343,83 @@ class Product extends \yii\db\ActiveRecord
     public function revokeTags():void
     {
         $this->tagAssignments = [];
+    }
+
+    /**
+     * @param $id
+     * related product
+     */
+    public function assignRelatedProduct($id):void
+    {
+        $assignments=$this->relatedAssiginments;
+        foreach ($assignments as $assignment){
+            if($assignment->isForProduct($id)){
+                return;
+            }
+        }
+        $assignments[]= RelatedAssignment::create($id);
+        $this->relatedAssignments=$assignments;
+    }
+
+    public function revokeRelatedProduct($id):void
+    {
+        $assignments=$this->relatedAssiginments;
+        foreach ($assignments as $i=>$assignment){
+            if($assignment->isForProduct($id)){
+                unset($assignments[$i]);
+                $this->relatedAssiginments=$assignments;
+                return;
+            }
+        }
+        throw new \DomainException('Assignment is not found.');
+    }
+
+    public function getModification($id):Modification
+    {
+        foreach ($this->modifications as $modification){
+            if($modification->isIdEqualTo($id)){
+                return $modification;
+            }
+        }
+        throw new \DomainException('Modification is not found.');
+    }
+
+    public function addModification($code, $name, $price): void
+    {
+        $modification=$this->modifications;
+        foreach ($modification as $modification){
+            if($modification->isCodeEqualTo($code)){
+                throw new \DomainException('Modification already exists.');
+            }
+        }
+        $modification[]=Modification::create($code, $name, $price);
+        $this->modification=$modification;
+    }
+
+    public function editModification($id,$code, $name, $price):void
+    {
+        $modifications=$this->modifications;
+        foreach ($modifications as $modification){
+            if($modification->isCodeEqualTo($id)){
+                $modification->edit($code, $name, $price);
+                $this->modifications=$modification;
+                return;
+            }
+        }
+        throw new \DomainException('Modification is not found.');
+    }
+
+    public function removeModification($id):void
+    {
+        $modification=$this->modifications;
+        foreach ($modification as $i=>$modification){
+            if($modification->isIdEqualTo($id)){
+                unset($modification[$i]);
+                $this->modifications=$modification;
+                return;
+            }
+        }
+        throw new \DomainException('Modification is not found.');
     }
 
 }
