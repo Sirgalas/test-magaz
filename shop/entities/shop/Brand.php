@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: root
- * Date: 21.08.18
- * Time: 0:20
- */
 
 namespace shop\entities\shop;
 

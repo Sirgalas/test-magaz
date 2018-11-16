@@ -444,41 +444,23 @@ class Product extends ActiveRecord
 
     public function editReview($id, $vote, $text):void
     {
-        $reviews=$this->reviews;
-        foreach ($reviews as $i=>$review){
-            if($review->isIdEqualTo($id)){
-                $review->edit($vote,$text);
-                $this->updateReviews($reviews);
-                return;
-            }
-        }
-        throw new \DomainException('Review is not found.');
+        $this->doWithReviews($id,function (Review $review)use($vote, $text){
+            $review->edit($vote,$text);
+        });
     }
 
     public function activateReview($id):void
     {
-        $reviews = $this->reviews;
-        foreach ($reviews as $i => $review) {
-            if ($review->isIdEqualTo($id)) {
-                $review->activate();
-                $this->updateReviews($reviews);
-                return;
-            }
-        }
-        throw new \DomainException('Review is not found.');
+        $this->doWithReviews($id,function (Review $review){
+            $review->activate();
+        });
     }
 
     public function draftReview($id):void
     {
-        $reviews=$this->reviews;
-        foreach ($reviews as $i=>$review){
-            if($review->isIdEqualTo($id)){
-                $review->draft();
-                $this->updateReviews($reviews);
-                return;
-            }
-        }
-        throw new \DomainException('Review is not found.');
+        $this->doWithReviews($id,function (Review $review){
+            $review->draft();
+        });
     }
 
     public function removeReview($id): void
@@ -491,6 +473,18 @@ class Product extends ActiveRecord
                 return;
             }
         }
+    }
+
+    private function  doWithReviews($id, callable $callback):void {
+        $reviews = $this->reviews;
+        foreach ($reviews as $review){
+            if($review->isIdEqualTo($id)){
+                $callback($review);
+                $this->updateReviews($reviews);
+                return;
+            }
+        }
+        throw new \DomainException('Review is not found.');
     }
 
     private function updateReviews(array $reviews): void
