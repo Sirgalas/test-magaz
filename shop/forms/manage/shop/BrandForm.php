@@ -1,7 +1,7 @@
 <?php
 namespace shop\forms\manage\shop;
 
-use shop\entities\Shop\Brand;
+use shop\entities\shop\Brand;
 use shop\forms\manage\MetaForm;
 use shop\validator\SlugValidator;
 use yii\helpers\ArrayHelper;
@@ -13,7 +13,6 @@ class BrandForm extends CompositeForm
 {
     public $name;
     public $slug;
-    private $_meta;
     private $_brand;
 
     public function __construct(Brand $brand = null, $config = [])
@@ -21,10 +20,10 @@ class BrandForm extends CompositeForm
         if ($brand) {
             $this->name = $brand->name;
             $this->slug = $brand->slug;
-            $this->_meta = new MetaForm($brand->meta);
+            $this->meta = new MetaForm($brand->meta);
             $this->_brand = $brand;
         }else{
-            $this->_meta = new MetaForm();
+            $this->meta = new MetaForm();
         }
         parent::__construct($config);
     }

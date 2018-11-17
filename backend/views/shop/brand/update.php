@@ -8,11 +8,7 @@ $this->params['breadcrumbs'][] = ['label' => $brand->name, 'url' => ['view', 'id
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="brand-update">
-    <div class="box box-primary">
-        <div class="box-body">
-            <?= $this->render('_form', [
-                'model' => $model,
-            ]) ?>
-        </div>
-    </div>
+    <?= $this->render('_form', [
+        'model' => $model,
+    ]) ?>
 </div>

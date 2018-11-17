@@ -47,7 +47,7 @@ class BrandController extends Controller
         );
     }
 
-    public function actionViews($id)
+    public function actionView($id)
     {
         return $this->render('view',
             [
@@ -67,6 +67,9 @@ class BrandController extends Controller
                 Yii::$app->session->setFlash('error', $e->getMessage());
             }
         }
+        return $this->render('create',[
+            'model'=>$form
+        ]);
     }
 
 
@@ -83,6 +86,9 @@ class BrandController extends Controller
                 Yii::$app->session->setFlash('error', $e->getMessage());
             }
         }
+        return $this->render('update',[
+            'model'=>$form
+        ]);
     }
 
     public function actionDelete($id)

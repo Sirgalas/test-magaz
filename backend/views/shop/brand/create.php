@@ -6,11 +6,8 @@ $this->params['breadcrumbs'][] = ['label' => 'Brands', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 <div class="brand-create">
-    <div class="box box-primary">
-        <div class="box-body">
-            <?= $this->render('_form', [
-                'model' => $model,
-            ]) ?>
-        </div>
-    </div>
+
+    <?= $this->render('_form', [
+        'model' => $model,
+    ]) ?>
 </div>
