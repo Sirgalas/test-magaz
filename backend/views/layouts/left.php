@@ -32,9 +32,25 @@
                 'items' => [
                     ['label' => 'Management', 'options' => ['class' => 'header']],
                     ['label'=>'Shop','icon'=>'folder','url'=>'#', 'items'=>[
-                        ['label'=>'Brand','icon'=>'file-o','url'=>['shop/brand/index'], 'active' =>$this->context->id == 'shop/brand']
+                        [
+                            'label'=>'Brand',
+                            'icon'=>'file-o',
+                            'url'=>['shop/brand/index'],
+                            'active' =>$this->context->id == 'shop/brand'
+                        ],
+                        [
+                            'label' => 'Tags',
+                            'icon' => 'file-o',
+                            'url' => ['/shop/tag/index'],
+                            'active' => $this->context->id == 'shop/tag'
+                        ]
                     ]],
-                    ['label' => 'Users', 'icon' => 'user', 'url' => ['/user/index'], 'active' => $this->context->id == 'user'],
+                    [
+                        'label' => 'Users',
+                        'icon' => 'user',
+                        'url' => ['/user/index'],
+                        'active' => $this->context->id == 'user'
+                    ],
                 ],
             ]
         ) ?>

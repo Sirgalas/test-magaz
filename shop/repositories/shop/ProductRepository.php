@@ -32,4 +32,9 @@ class ProductRepository
        $product=$this->get($id);
        $product->delete();
     }
+
+    public function existsByBrand($id):bool
+    {
+        return Product::find()->andWhere(['barnd_id'=>$id])->exists();
+    }
 }

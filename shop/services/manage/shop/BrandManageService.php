@@ -8,6 +8,7 @@
 
 namespace shop\services\manage\shop;
 
+use repositories\shop\ProductRepository;
 use shop\entities\Meta;
 use shop\entities\shop\Brand;
 use shop\forms\manage\shop\BrandForm;
@@ -17,10 +18,12 @@ use yii\helpers\Inflector;
 class BrandManageService
 {
     private $brand;
+    private $product;
 
-    public function __construct(BrandRepository $brand)
+    public function __construct(BrandRepository $brand, ProductRepository $product)
     {
         $this->brand=$brand;
+        $this->product=$product;
     }
 
     public function create(BrandForm $form) : Brand
@@ -55,6 +58,9 @@ class BrandManageService
 
     public function remove($id) : void
     {
+        if($this->product->existsByBrand($id)){
+            throw new \DomainException('Unable to remove brand with products.');
+        }
         $brand=$this->brand->get($id);
         $this->brand->remove($brand);
     }

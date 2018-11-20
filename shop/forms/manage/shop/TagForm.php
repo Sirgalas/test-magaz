@@ -18,7 +18,7 @@ class TagForm extends Model
 
     private $_tags;
 
-    public function __construct(Tags $tags, $config = [])
+    public function __construct(Tags $tags=null, $config = [])
     {
         if($tags)
         {
