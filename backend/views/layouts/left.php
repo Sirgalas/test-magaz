@@ -51,6 +51,12 @@
                         'url' => ['/user/index'],
                         'active' => $this->context->id == 'user'
                     ],
+                    [
+                        'label' => 'Categories',
+                        'icon' => 'file-o',
+                        'url' => ['/shop/category/index'],
+                        'active' => $this->context->id == 'shop/category'
+                    ],
                 ],
             ]
         ) ?>

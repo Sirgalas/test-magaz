@@ -1,12 +1,13 @@
 <?php
 
-namespace forms\manage\shop;
+namespace shop\forms\manage\shop;
 
 use shop\entities\Meta;
 use shop\entities\shop\Categories;
 use shop\forms\CompositeForm;
 use shop\forms\manage\MetaForm;
 use shop\validator\SlugValidator;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class CategoryForm
@@ -55,6 +56,17 @@ class CategoryForm extends CompositeForm
               ['slug', SlugValidator::class],
               [['name', 'slug'], 'unique', 'targetClass' => Categories::class, 'filter' => $this->_category ? ['<>', 'id', $this->_category->id] : null]
        ];
+    }
+
+    public function parentCategoriesList():array
+    {
+        return ArrayHelper::map(
+            Categories::find()->orderBy('lft')->asArray()->all(),
+            'id',
+            function (array $category){
+                return ($category['depth']>1?str_repeat('-- ', $category['depth'] - 1). ' ' : '') . $category['name'];
+            }
+        );
     }
 
     public function internalForms(): array
