@@ -2,7 +2,7 @@
 
 namespace shop\entities\shop;
 
-use forms\manage\shop\CharacteristicForm;
+use shop\forms\manage\shop\CharacteristicForm;
 use yii\db\ActiveRecord;
 use yii\helpers\Json;
 

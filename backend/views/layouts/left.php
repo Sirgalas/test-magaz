@@ -57,6 +57,11 @@
                         'url' => ['/shop/category/index'],
                         'active' => $this->context->id == 'shop/category'
                     ],
+                    [
+                        'label' => 'Characteristics',
+                        'icon' => 'file-o',
+                        'url' => ['/shop/characteristic/index'],
+                        'active' => $this->context->id == 'shop/characteristic'],
                 ],
             ]
         ) ?>

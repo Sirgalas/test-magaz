@@ -37,4 +37,9 @@ class ProductRepository
     {
         return Product::find()->andWhere(['barnd_id'=>$id])->exists();
     }
+
+    public function existByMainCategory($id):bool
+    {
+        return Product::find()->andWhere(['category_id'=>$id])->exists();
+    }
 }

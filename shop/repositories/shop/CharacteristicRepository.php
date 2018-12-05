@@ -1,6 +1,6 @@
 <?php
 
-namespace repositories\shop;
+namespace shop\repositories\shop;
 
 use http\Exception\RuntimeException;
 use shop\entities\shop\Categories;

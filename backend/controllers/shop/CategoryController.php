@@ -35,6 +35,8 @@ class CategoryController extends Controller
                 'class' => VerbFilter::class,
                 'actions' => [
                     'delete' => ['POST'],
+                    'move-up' => ['POST'],
+                    'move-down' => ['POST'],
                 ],
             ],
         ];
@@ -102,8 +104,17 @@ class CategoryController extends Controller
         ]);
     }
 
+    public function actionMoveUp($id)
+    {
+        $this->service->moveUp($id);
+        return $this->redirect($id);
+    }
 
-
+    public function actionMoveDown($id)
+    {
+        $this->service->moveDown($id);
+        return $this->redirect($id);
+    }
     /**
      * @param integer $id
      * @return Categories the loaded model

@@ -19,7 +19,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'dataProvider' => $dataProvider,
                 'filterModel' => $searchModel,
                 'columns' => [
-                    'id',
                     [
                         'attribute' => 'name',
                         'value' => function (Categories $model) {
@@ -27,6 +26,22 @@ $this->params['breadcrumbs'][] = $this->title;
                             return $indent . Html::a(Html::encode($model->name), ['view', 'id' => $model->id]);
                         },
                         'format' => 'raw',
+                    ],
+                    [
+                        'value' => function (Categories $model) {
+                            return
+                                Html::a(
+                                    '<span class="glyphicon glyphicon-arrow-up"></span>',
+                                    ['move-up', 'id' => $model->id],
+                                    ['data-method'=>'post']) .
+                                Html::a(
+                                    '<span class="glyphicon glyphicon-arrow-down"></span>',
+                                    ['move-down', 'id' => $model->id],
+                                    ['data-method'=>'post']
+                                );
+                        },
+                        'format' => 'raw',
+                        'contentOptions' => ['style' => 'text-align: center'],
                     ],
                     'slug',
                     'title',

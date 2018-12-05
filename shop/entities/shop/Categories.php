@@ -3,7 +3,7 @@
 namespace shop\entities\shop;
 
 
-use forms\manage\shop\CategoryForm;
+use shop\forms\manage\shop\CategoryForm;
 use paulzi\nestedsets\NestedSetsBehavior;
 use shop\entities\behaviors\MetaBehavior;
 use shop\entities\Meta;
@@ -21,6 +21,9 @@ use yii\db\ActiveRecord;
  * @property int $lft
  * @property int $rgt
  * @property int $depth
+ *
+ * @property Categories $prev
+ * @property Categories $next
  */
 class Categories extends ActiveRecord
 {

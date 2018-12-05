@@ -3,7 +3,8 @@
 
 namespace shop\services\manage\shop;
 
-use forms\manage\shop\CategoryForm;
+use repositories\shop\ProductRepository;
+use shop\forms\manage\shop\CategoryForm;
 use shop\entities\Meta;
 use shop\entities\shop\Categories;
 use shop\repositories\shop\CategoryRepository;
@@ -11,10 +12,12 @@ use shop\repositories\shop\CategoryRepository;
 class CategoryManageService
 {
    private $repository;
+   private $product;
 
-   public function __construct(CategoryRepository $repository)
+   public function __construct(CategoryRepository $repository,ProductRepository $product)
    {
        $this->repository=$repository;
+       $this->product=$product;
    }
 
    public function create(CategoryForm $form):Categories
@@ -56,6 +59,29 @@ class CategoryManageService
    {
        $category=$this->repository->get($id);
        $this->assertIsNotRoot($category);
+       if($this->product->existByMainCategory($category->id)){
+           throw new \DomainException('Unable to remove category with products.');
+       }
+       $this->repository->save($category);
+   }
+
+   public function moveUp($id):void
+   {
+       $category=$this->repository->get($id);
+       $this->assertIsNotRoot($category);
+       if($prev=$category->prev){
+           $category->insertBefore($prev);
+       }
+       $this->repository->save($category);
+   }
+
+   public function moveDown($id):void
+   {
+       $category=$this->repository->get($id);
+       $this->assertIsNotRoot($category);
+       if($prev=$category->prev){
+           $category->insertAfter($prev);
+       }
        $this->repository->save($category);
    }
 

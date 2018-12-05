@@ -1,8 +1,9 @@
 <?php
 
-namespace forms\manage\shop;
+namespace shop\forms\manage\shop;
 
-use entities\shop\Characteristic;
+use shop\entities\shop\Characteristic;
+use shop\helpers\CharacteristicHelper;
 use yii\base\Model;
 
 /**
@@ -14,6 +15,7 @@ use yii\base\Model;
  * @property string $default,
  * @property string $textVariants;
  * @property string $sort
+ * @property array $variants
  **/
 class CharacteristicForm extends Model
 {
@@ -52,6 +54,11 @@ class CharacteristicForm extends Model
             [['sort'], 'integer'],
             [['name'], 'unique', 'targetClass' => Characteristic::class, 'filter' => $this->_characteristic ? ['<>', 'id', $this->_characteristic->id] : null]
         ];
+    }
+
+    public function typeList()
+    {
+        return CharacteristicHelper::typeList();
     }
 
     public function getVariants(): array
